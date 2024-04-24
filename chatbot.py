@@ -1,7 +1,7 @@
 import openai
 import streamlit as st
 
-st.title("Virtual Bot")
+st.title("Virtual Bot 🐱‍👤")
 
 openai.api_key = st.secrets["OPEN_API_KEY"]
 
