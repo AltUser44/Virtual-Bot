@@ -32,19 +32,21 @@ if prompt:
         message_placeholder = st.empty()
         full_response = ""
 
-        # API Call - Replace deprecated ChatCompletion with Completion
+        # Concatenate chat history into a single prompt for the API call
+        chat_history = "\n".join(f"{m['role']}: {m['content']}" for m in st.session_state["messages"])
+        
+        # API Call - Correct usage of Completion.create()
         response = openai.Completion.create(
             model=st.session_state["openai_model"],
-            messages=[
-                {"role": m["role"], "content": m["content"]}
-                for m in st.session_state["messages"]
-            ],
+            prompt=chat_history,
             max_tokens=150,
             temperature=0.9
         )
-        
-        # Assuming the structure of the response object fits the expected
-        full_response += response['choices'][0]['message']['content']
-        message_placeholder.markdown(full_response)
 
-    st.session_state["messages"].append({"role": "assistant", "content": full_response})
+        # Handle the response appropriately
+        if response.choices:
+            full_response = response.choices[0].text.strip()
+            message_placeholder.markdown(full_response)
+
+        # Append the response to chat history
+        st.session_state["messages"].append({"role": "assistant", "content": full_response})
