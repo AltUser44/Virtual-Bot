@@ -37,15 +37,15 @@ if prompt:
         
         # API Call - Correct usage of Completion.create()
         response = openai.Completion.create(
-            model=st.session_state["openai_model"],
+            engine="text-davinci-003",  # Specify the engine instead of model
             prompt=chat_history,
             max_tokens=150,
             temperature=0.9
         )
 
         # Handle the response appropriately
-        if response.choices:
-            full_response = response.choices[0].text.strip()
+        if response["choices"]:
+            full_response = response["choices"][0]["text"].strip()
             message_placeholder.markdown(full_response)
 
         # Append the response to chat history
