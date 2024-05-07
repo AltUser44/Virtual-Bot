@@ -31,22 +31,16 @@ if prompt:
     with st.chat_message("assistant"):
         message_placeholder = st.empty()
         full_response = ""
-
-        # Concatenate chat history into a single prompt for the API call
-        chat_history = "\n".join(f"{m['role']}: {m['content']}" for m in st.session_state["messages"])
-        
-        # API Call - Correct usage of Completion.create()
-        response = openai.Completion.create(
-            engine="text-davinci-003",  # Specify the engine instead of model
-            prompt=chat_history,
-            max_tokens=150,
-            temperature=0.9
-        )
-
-        # Handle the response appropriately
-        if response["choices"]:
-            full_response = response["choices"][0]["text"].strip()
-            message_placeholder.markdown(full_response)
-
-        # Append the response to chat history
-        st.session_state["messages"].append({"role": "assistant", "content": full_response})
+        for response in openai.ChatCompletion.create(
+            model=st.session_state['openai_model'],
+            messages=[
+                {'role': m['role'], 'content': m['content']}
+                for m in st.session_state["messages"]
+            ],
+            stream=True,
+        ):
+            full_response += response.choices[0].delta.get("content", "")
+            message_placeholder.markdown(full_response + "|")
+        message_placeholder.markdown(full_response)
+     
+    st.session_state["messages"].append({"role": "assistant", "content": full_response})
